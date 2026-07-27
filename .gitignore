@@ -1,0 +1,22 @@
+# Archivo de configuración local con credenciales sensibles
+includes/config.php
+
+# Archivos de entorno si llegas a usar .env
+.env
+.env.local
+
+# Archivos subidos por usuarios (tickets, comprobantes)
+uploads/tickets/*
+uploads/mantenimientos/*
+!uploads/tickets/.gitkeep
+!uploads/mantenimientos/.gitkeep
+
+# Archivos temporales de logs
+webhook_log.json
+*.log
+
+# Archivos del sistema operativo y editores
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

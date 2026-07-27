@@ -33,3 +33,12 @@ if (!isset($_SESSION['usuario_id'])) {
 function esAdmin() {
     return isset($_SESSION['rol']) && $_SESSION['rol'] === 'admin';
 }
+
+session_set_cookie_params([
+    'lifetime' => 0           // Expira al cerrar el navegador/pestaña
+    //'path'     => '/',          // Disponible en todo el sitio
+    //'domain'   => '',           // Dominio o IP actual
+    //'secure'   => false,        // Cambiar a 'true' si usas HTTPS (Certbot)
+    //'httponly' => true,         // Protege contra ataques XSS (no accesible por JavaScript)
+    //'samesite' => 'Lax'         // Protección contra CSRF
+]);
