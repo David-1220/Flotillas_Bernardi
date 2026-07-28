@@ -19,7 +19,7 @@ require_once 'includes/header.php';
   
   <div class="page-header" style="display: flex; justify-content: space-between; align-items: center;">
     <div>
-      <h1>🚗 Flotilla de Vehículos</h1>
+      <h1> Vehículos</h1>
       <p>Selecciona un vehículo para ver su historial completo o registrar actividad.</p>
     </div>
     <?php if (($_SESSION['role'] ?? '') === 'admin'): ?>

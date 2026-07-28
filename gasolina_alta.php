@@ -237,9 +237,6 @@ include 'includes/header.php';
       <div class="form-group full">
         <label for="ticket_foto">📷 Comprobante / Foto del Ticket</label>
         <input type="file" id="ticket_foto" name="ticket_foto" accept="image/*,.pdf" />
-        <small style="color: var(--text-muted); font-size: 0.75rem; display: block; margin-top: 4px;">
-          ⚡ La imagen se comprimirá automáticamente a ~150 KB para optimizar el almacenamiento.
-        </small>
       </div>
 
       <div class="form-group full">
@@ -249,7 +246,7 @@ include 'includes/header.php';
 
       <div class="form-group full btn-actions" style="margin-top: 1rem;">
         <button type="submit" class="btn btn-primary" style="flex: 1; justify-content: center;">
-          💾 Guardar Carga
+           Guardar Carga
         </button>
         <a href="<?= $vehiculo_id_preset ? 'vehiculo_detalle.php?id='.$vehiculo_id_preset : 'index.php' ?>" class="btn btn-outline">
           Cancelar

@@ -111,7 +111,7 @@ include 'includes/header.php';
 
   <div class="card" style="max-width: 500px; margin: 0 auto;">
     <div class="page-header" style="margin-bottom: 1.2rem;">
-      <h1>👤 <?= $es_edicion ? 'Editar Usuario' : 'Nuevo Usuario' ?></h1>
+      <h1> <?= $es_edicion ? 'Editar Usuario' : 'Nuevo Usuario' ?></h1>
       <p><?= $es_edicion ? 'Actualiza los datos o permisos de la cuenta.' : 'Registra un nuevo usuario para el sistema.' ?></p>
     </div>
 
@@ -150,7 +150,7 @@ include 'includes/header.php';
 
       <div class="form-group btn-actions" style="margin-top: 1rem;">
         <button type="submit" class="btn btn-primary" style="flex: 1; justify-content: center;">
-          💾 <?= $es_edicion ? 'Guardar Cambios' : 'Crear Usuario' ?>
+           <?= $es_edicion ? 'Guardar Cambios' : 'Crear Usuario' ?>
         </button>
         <a href="usuarios.php" class="btn btn-outline">Cancelar</a>
       </div>

@@ -236,7 +236,7 @@ include 'includes/header.php';
 
       <div class="form-group full btn-actions" style="margin-top: 1rem;">
         <button type="submit" class="btn btn-primary" style="flex: 1; justify-content: center;">
-          💾 Guardar Mantenimiento
+           Guardar Mantenimiento
         </button>
         <a href="<?= $vehiculo_id_preset ? 'vehiculo_detalle.php?id='.$vehiculo_id_preset : 'index.php' ?>" class="btn btn-outline">
           Cancelar

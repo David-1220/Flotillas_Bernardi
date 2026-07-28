@@ -37,7 +37,7 @@ $isAdmin = esAdmin();
     <!-- Estilos del logo dentro del header -->
 <style>
   .header-logo-img {
-    height: 100px; /* Ajusta la altura del logo para que quede alineado con el menú */
+    height: 70px; /* Ajusta la altura del logo para que quede alineado con el menú */
     width: auto;
     display: block;
     object-fit: contain;
@@ -63,28 +63,28 @@ $isAdmin = esAdmin();
         <nav style="display: flex; align-items: center; gap: 0.8rem; flex-wrap: wrap;">
             <!-- Enlace al catálogo -->
             <a href="index.php" class="nav-link" style="color: var(--text-muted, #94a3b8); text-decoration: none; font-size: 0.9rem; font-weight: 500; margin-right: 0.5rem;">
-                📋 Catálogo
+                 Catálogo
             </a>
 
             <!-- BOTÓN: Agregar Vehículo -->
             <?php if ($isAdmin): ?>
                 <a href="vehiculo_alta.php" class="btn btn-outline btn-sm" style="display: inline-flex; align-items: center; gap: 5px;">
-                    🚗 + Agregar Vehículo
+                     + Agregar Vehículo
                 </a>
             <?php else: ?>
                 <span class="btn btn-outline btn-sm btn-disabled" title="Requiere permisos de Administrador">
-                    🚗 + Agregar Vehículo
+                     + Agregar Vehículo
                 </span>
             <?php endif; ?>
 
             <!-- BOTÓN: Agregar Usuario -->
             <?php if ($isAdmin): ?>
                 <a href="usuarios.php" class="btn btn-primary btn-sm" style="display: inline-flex; align-items: center; gap: 5px;">
-                    👤 + Agregar Usuario
+                     + Agregar Usuario
                 </a>
             <?php else: ?>
                 <span class="btn btn-primary btn-sm btn-disabled" title="Requiere permisos de Administrador">
-                    👤 + Agregar Usuario
+                    + Agregar Usuario
                 </span>
             <?php endif; ?>
 
