@@ -78,14 +78,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       max-width: 380px;
       box-shadow: var(--shadow);
     }
-    .login-logo { text-align:center; font-size:2.5rem; margin-bottom:.5rem; }
+    .login-logo { text-align:center; margin-bottom:.5rem; }
+    .login-logo img {
+      max-width: 80px; /* Cambia este valor para hacer la imagen más grande o pequeña */
+      height: auto;
+      display: inline-block;
+    }
     .login-title { text-align:center; font-size:1.3rem; font-weight:700; margin-bottom:.3rem; }
     .login-sub { text-align:center; font-size:.85rem; color:var(--text-muted); margin-bottom:1.8rem; }
   </style>
 </head>
 <body>
   <div class="login-box">
-    <div class="login-logo">🚗</div>
+    <div class="login-logo">
+      <img src="uploads/bernardi/logo-n.png" alt="Logo Bernardi" />
+    </div>
     <div class="login-title">Flotillas Bernardi</div>
     <div class="login-sub">Sistema de gestión de Flotillas Bernardi</div>
 
@@ -106,7 +113,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                placeholder="••••••••" autocomplete="current-password" required />
       </div>
       <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center;">
-        🔑 Iniciar sesión
+        Iniciar sesión
       </button>
     </form>
   </div>
