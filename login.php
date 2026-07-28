@@ -80,7 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     .login-logo { text-align:center; margin-bottom:.5rem; }
     .login-logo img {
-      max-width: 80px; /* Cambia este valor para hacer la imagen más grande o pequeña */
+      max-width: 200px; /* Cambia este valor para hacer la imagen más grande o pequeña */
       height: auto;
       display: inline-block;
     }
@@ -91,7 +91,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body>
   <div class="login-box">
     <div class="login-logo">
-      <img src="uploads/bernardi/logo-n.png" alt="Logo Bernardi" />
+      <img src="uploads/bernardi/logo-b.png" alt="Logo Bernardi" />
     </div>
     <div class="login-title">Flotillas Bernardi</div>
     <div class="login-sub">Sistema de gestión de Flotillas Bernardi</div>
