@@ -11,7 +11,7 @@ if (session_status() === PHP_SESSION_NONE) {
 if (empty($_SESSION['usuario_id'])) {
     // Guardar la URL intentada para redirigir después del login
     $_SESSION['redirect_after_login'] = $_SERVER['REQUEST_URI'];
-    header('Location: /proyecto_autos/login.php');
+    header('Location: /Flotillas_Bernardi/login.php');
     exit();
 }
 
@@ -25,7 +25,7 @@ if (!isset($_SESSION['last_regeneration'])) {
 
 // Si no existe la sesión, redirige de inmediato a la página de login
 if (!isset($_SESSION['usuario_id'])) {
-    header("Location: /proyecto_autos/login.php");
+    header("Location: /Flotillas_Bernardi/login.php");
     exit(); // Detiene la ejecución para que no se renderice nada más
 }
 
@@ -35,10 +35,32 @@ function esAdmin() {
 }
 
 session_set_cookie_params([
-    'lifetime' => 0           // Expira al cerrar el navegador/pestaña
-    //'path'     => '/',          // Disponible en todo el sitio
-    //'domain'   => '',           // Dominio o IP actual
-    //'secure'   => false,        // Cambiar a 'true' si usas HTTPS (Certbot)
-    //'httponly' => true,         // Protege contra ataques XSS (no accesible por JavaScript)
-    //'samesite' => 'Lax'         // Protección contra CSRF
+    'lifetime' => 0,
+    'path'     => '/',
+    'domain'   => '',
+    'secure'   => false, // Cambiar a true con HTTPS
+    'httponly' => true,
+    'samesite' => 'Lax'
 ]);
+
+// --- CONTROL DE INACTIVIDAD (Ejemplo: 15 minutos = 900 segundos) ---
+$inactividad = 900;
+
+if (isset($_SESSION['ultimo_acceso'])) {
+    $tiempo_transcurrido = time() - $_SESSION['ultimo_acceso'];
+    if ($tiempo_transcurrido > $inactividad) {
+        // Sesión expirada por inactividad
+        session_unset();
+        session_destroy();
+        header("Location: login.php?msg=sesion_expirada");
+        exit();
+    }
+}
+// Actualizar la marca de tiempo de la última petición
+$_SESSION['ultimo_acceso'] = time();
+
+// Validar autenticación
+if (empty($_SESSION['usuario_id'])) {
+    header('Location: login.php');
+    exit();
+}
