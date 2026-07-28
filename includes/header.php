@@ -34,13 +34,29 @@ $isAdmin = esAdmin();
     </style>
 </head>
 <body>
+    <!-- Estilos del logo dentro del header -->
+<style>
+  .header-logo-img {
+    height: 100px; /* Ajusta la altura del logo para que quede alineado con el menú */
+    width: auto;
+    display: block;
+    object-fit: contain;
+  }
+  .app-header a {
+    transition: opacity 0.2s ease;
+  }
+  .app-header a:hover {
+    opacity: 0.85;
+  }
+</style>
 
 <header class="app-header" style="background-color: var(--bg-card, #121e2d); border-bottom: 1px solid var(--border-color, #1e2d3d); padding: 0.8rem 1.5rem;">
     <div style="max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
         
-        <!-- Logotipo / Nombre del Sistema -->
-        <a href="index.php" style="display: flex; align-items: center; gap: 8px; text-decoration: none; color: #ffffff; font-size: 1.2rem; font-weight: 700;">
-            🚗 Bernardi <span style="color: #2563eb;"></span>
+        <!-- Logotipo / Nombre del Sistema con Imagen -->
+        <a href="index.php" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: #ffffff; font-size: 1.2rem; font-weight: 700;">
+            <img src="uploads/bernardi/logo-b.png" alt="Logo Bernardi" class="header-logo-img" />
+            <span>Flotillas</span>
         </a>
 
         <!-- Menú de Navegación -->
