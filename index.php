@@ -26,10 +26,13 @@ if ($user_role === 'admin') {
         FROM vehiculos v 
         LEFT JOIN vehiculo_usuarios vu ON v.id = vu.vehiculo_id 
         LEFT JOIN usuarios u ON v.en_uso_por = u.id 
-        WHERE vu.usuario_id = :user_id OR v.en_uso_por = :user_id 
+        WHERE vu.usuario_id = :u_id1 OR v.en_uso_por = :u_id2 
         ORDER BY v.id DESC
     ");
-    $stmt->execute(['user_id' => $user_id]);
+    $stmt->execute([
+        'u_id1' => $user_id,
+        'u_id2' => $user_id
+    ]);
 }
 
 $vehiculos = $stmt->fetchAll(PDO::FETCH_ASSOC);
