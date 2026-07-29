@@ -8,10 +8,10 @@ require_once 'includes/db.php';
 require_once 'includes/auth_check.php';
 
 $db = getDB();
+// index.php — Consulta de vehículos
 $user_role = $_SESSION['rol'] ?? ($_SESSION['user_role'] ?? 'auxiliar');
 $user_id   = $_SESSION['user_id'];
 
-// Consulta filtrada según rol
 if ($user_role === 'admin') {
     $stmt = $db->query("
         SELECT v.*, u.nombre AS en_uso_nombre 
@@ -20,11 +20,13 @@ if ($user_role === 'admin') {
         ORDER BY v.id DESC
     ");
 } else {
+    // Busca si el usuario está en la tabla intermedia O si lo trae en tránsito
     $stmt = $db->prepare("
-        SELECT v.*, u.nombre AS en_uso_nombre 
+        SELECT DISTINCT v.*, u.nombre AS en_uso_nombre 
         FROM vehiculos v 
+        LEFT JOIN vehiculo_usuarios vu ON v.id = vu.vehiculo_id 
         LEFT JOIN usuarios u ON v.en_uso_por = u.id 
-        WHERE v.usuario_asignado_id = :user_id OR v.en_uso_por = :user_id 
+        WHERE vu.usuario_id = :user_id OR v.en_uso_por = :user_id 
         ORDER BY v.id DESC
     ");
     $stmt->execute(['user_id' => $user_id]);

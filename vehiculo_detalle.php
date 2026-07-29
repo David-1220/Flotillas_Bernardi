@@ -12,9 +12,42 @@ $db = getDB();
 // 1. Datos del auto
 $stmt = $db->prepare("SELECT * FROM vehiculos WHERE id = :id LIMIT 1");
 $stmt->execute([':id' => $id]);
-$auto = $stmt->fetch();
+$auto = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$auto) { die("Vehículo no encontrado."); }
+
+// 2. Consultar usuarios asignados en la tabla pivote
+$stmtAsig = $db->prepare("
+    SELECT u.id, u.nombre, u.username 
+    FROM vehiculo_usuarios vu 
+    JOIN usuarios u ON vu.usuario_id = u.id 
+    WHERE vu.vehiculo_id = :id
+");
+$stmtAsig->execute([':id' => $id]);
+$usuarios_asignados = $stmtAsig->fetchAll(PDO::FETCH_ASSOC);
+$assigned_ids = array_column($usuarios_asignados, 'id');
+
+// 3. Lista completa de usuarios para el panel de asignación
+$stmtTodosUsuarios = $db->query("SELECT id, nombre, username FROM usuarios ORDER BY nombre ASC");
+$lista_todos_usuarios = $stmtTodosUsuarios->fetchAll(PDO::FETCH_ASSOC);
+
+// Procesar reasignación múltiple de chóferes (Solo Admin)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reasignar_usuarios_multiples'])) {
+    $nuevos_ids = $_POST['usuarios_asignados'] ?? [];
+
+    $stmtDel = $db->prepare("DELETE FROM vehiculo_usuarios WHERE vehiculo_id = :id");
+    $stmtDel->execute([':id' => $id]);
+
+    if (!empty($nuevos_ids) && is_array($nuevos_ids)) {
+        $stmtIns = $db->prepare("INSERT INTO vehiculo_usuarios (vehiculo_id, usuario_id) VALUES (:v_id, :u_id)");
+        foreach ($nuevos_ids as $u_id) {
+            $stmtIns->execute(['v_id' => $id, 'u_id' => (int)$u_id]);
+        }
+    }
+
+    header("Location: vehiculo_detalle.php?id=" . $id . "&msg=reasignado_ok");
+    exit();
+}
 
 // Procesar cambio manual de estado
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cambiar_estado'])) {
@@ -30,20 +63,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cambiar_estado'])) {
     }
 }
 
-// 2. Cargas de gasolina del auto
+// 4. Cargas de gasolina del auto
 $stmtGas = $db->prepare("SELECT g.*, u.nombre as usuario_nombre FROM cargas_gasolina g LEFT JOIN usuarios u ON g.usuario_id = u.id WHERE g.vehiculo_id = :id ORDER BY g.fecha_carga DESC, g.id DESC");
 $stmtGas->execute([':id' => $id]);
-$gasolinas = $stmtGas->fetchAll();
+$gasolinas = $stmtGas->fetchAll(PDO::FETCH_ASSOC);
 
-// 3. Mantenimientos del auto
+// 5. Mantenimientos del auto
 $stmtMant = $db->prepare("SELECT * FROM mantenimientos WHERE vehiculo_id = :id ORDER BY fecha_servicio DESC, id DESC");
 $stmtMant->execute([':id' => $id]);
-$mantenimientos = $stmtMant->fetchAll();
+$mantenimientos = $stmtMant->fetchAll(PDO::FETCH_ASSOC);
 
-// 4. Consultar viaje activo en la bitácora
+// 6. Consultar viaje activo en la bitácora
 $stmtUso = $db->prepare("SELECT * FROM bitacora_uso WHERE vehiculo_id = :id AND estado = 'en_transito' ORDER BY id DESC LIMIT 1");
 $stmtUso->execute([':id' => $id]);
-$viaje_activo = $stmtUso->fetch();
+$viaje_activo = $stmtUso->fetch(PDO::FETCH_ASSOC);
 
 require_once 'includes/header.php';
 ?>
@@ -64,21 +97,61 @@ require_once 'includes/header.php';
     <a href="index.php" class="btn btn-outline btn-sm">← Volver al catálogo</a>
   </div>
   
-  <!-- Encabezado del Vehículo -->
+<!-- Encabezado del Vehículo -->
   <div class="card">
-    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
       <div>
         <h1 style="font-size: 1.8rem; margin-bottom: 0.4rem;">
           <?= htmlspecialchars($auto['marca'] . ' ' . $auto['modelo']) ?> (<?= $auto['anio'] ?>)
         </h1>
-        <p style="color: var(--text-muted); font-size: 0.9rem; margin: 0;">
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 0.5rem;">
           Placas: <b style="color: var(--accent);"><?= htmlspecialchars($auto['placas']) ?></b> | 
           VIN: <?= htmlspecialchars($auto['vin'] ?? 'N/A') ?> | 
           Km Actual: <b><?= number_format($auto['kilometraje_actual']) ?> km</b>
         </p>
+
+        <!-- Muestra todos los chóferes asignados -->
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;">
+          👥 <b>Asignado a:</b> 
+          <?php if (empty($usuarios_asignados)): ?>
+            <span style="color: #e74c3c;">Sin asignar (Libre)</span>
+          <?php else: ?>
+            <span style="color: var(--text);">
+              <?= implode(', ', array_map(fn($u) => htmlspecialchars($u['nombre']), $usuarios_asignados)) ?>
+            </span>
+          <?php endif; ?>
+        </p>
       </div>
-      <div style="display: flex; gap: 10px;">
-        <form method="POST" style="display: inline-flex; align-items: center; gap: 8px;">
+
+      <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+        
+        <!-- Formulario/Dropdown Múltiple para reasignación (Solo Admins) -->
+        <?php if (($_SESSION['rol'] ?? $_SESSION['user_role'] ?? '') === 'admin'): ?>
+          <details style="position: relative; display: inline-block;">
+            <summary class="btn btn-outline btn-sm" style="cursor: pointer; list-style: none; padding: 10px 14px; user-select: none;">
+              👥 Editar Chóferes ▾
+            </summary>
+
+            <form method="POST" style="position: absolute; left: 0; top: 115%; background: #162133; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 14px; min-width: 320px; width: max-content; max-width: 420px; z-index: 1000; box-shadow: 0 8px 24px rgba(0,0,0,0.5);">
+              <input type="hidden" name="reasignar_usuarios_multiples" value="1">
+              <p style="font-size: 0.85rem; font-weight: bold; margin-bottom: 10px; color: #fff;">Selecciona los asignados:</p>
+              
+              <div style="max-height: 200px; overflow-y: auto; margin-bottom: 12px; padding-right: 4px;">
+                <?php foreach ($lista_todos_usuarios as $usr): ?>
+                  <label style="display: flex; align-items: center; gap: 10px; font-size: 0.85rem; margin-bottom: 8px; cursor: pointer; white-space: nowrap; color: #e2e8f0;">
+                    <input type="checkbox" name="usuarios_asignados[]" value="<?= $usr['id'] ?>" <?= in_array($usr['id'], $assigned_ids) ? 'checked' : '' ?> style="width: 16px; height: 16px; shrink: 0; cursor: pointer;">
+                    <span><?= htmlspecialchars($usr['nombre']) ?></span>
+                  </label>
+                <?php endforeach; ?>
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-sm" style="width: 100%; padding: 8px; font-size: 0.85rem;">Guardar Asignaciones</button>
+            </form>
+          </details>
+        <?php endif; ?>
+
+        <!-- Selector de estado activo/mantenimiento/inactivo -->
+        <form method="POST" style="display: inline-flex; align-items: center;">
           <input type="hidden" name="cambiar_estado" value="1">
           <select name="estado" onchange="this.form.submit()" class="btn btn-outline btn-sm" style="padding: 10px; cursor: pointer;">
               <option value="activo" <?= ($auto['estado'] === 'activo') ? 'selected' : '' ?>>🟢 Activo</option>
@@ -86,6 +159,7 @@ require_once 'includes/header.php';
               <option value="inactivo" <?= ($auto['estado'] === 'inactivo') ? 'selected' : '' ?>>🔴 Inactivo</option>
           </select>
         </form>
+
         <a href="gasolina_alta.php?vehiculo_id=<?= $auto['id'] ?>" class="btn btn-primary">+ Carga Gasolina</a>
         <a href="mantenimiento_alta.php?vehiculo_id=<?= $auto['id'] ?>" class="btn btn-outline">+ Mantenimiento</a>
       </div>
