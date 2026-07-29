@@ -6,7 +6,6 @@
 require_once 'includes/config.php';
 require_once 'includes/db.php';
 require_once 'includes/auth_check.php';
-
 $db = getDB();
 $mensaje = '';
 $error = '';
@@ -126,6 +125,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
 
                 if (!$error) {
+                    $usuario_id = $_SESSION['user_id']; // Extraer ID del usuario logueado
+
                     $db->beginTransaction();
 
                     $sqlGas = "INSERT INTO cargas_gasolina 
