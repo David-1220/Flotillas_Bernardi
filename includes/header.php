@@ -24,7 +24,7 @@ $isAdmin = esAdmin();
     <!-- Hoja de estilos global -->
     <link rel="stylesheet" href="css/style.css?v=<?= time() ?>">
 
-    <style>
+<style>
         /* RESET & REGLAS DIRECTAS PARA EVITAR PROBLEMAS DE CACHÉ */
         .app-header {
             background-color: #0b1329 !important;
@@ -182,27 +182,29 @@ $isAdmin = esAdmin();
             border-radius: 2px !important;
         }
 
-        /* ADAPTACIÓN MÓVIL (PANTALLAS <= 768px) */
+        /* ADAPTACIÓN MÓVIL CORREGIDA (PANTALLAS <= 768px) */
         @media (max-width: 768px) {
             .hamburger-btn {
                 display: flex !important;
             }
 
             .header-nav {
-                display: none !important;
+                display: none; /* Se quita el !important para que .active pueda sobreescribirlo */
                 flex-direction: column !important;
                 align-items: stretch !important;
                 position: absolute !important;
-                top: 52px !important;
+                top: 100% !important;
                 left: -24px !important;
                 right: -24px !important;
                 background-color: #0b1329 !important;
-                border-bottom: 1px solid #1e293b !important;
+                border-bottom: 2px solid #1e293b !important;
                 padding: 20px 24px !important;
                 gap: 16px !important;
-                box-shadow: 0 10px 25px rgba(0,0,0,0.6) !important;
+                box-shadow: 0 10px 25px rgba(0,0,0,0.8) !important;
+                z-index: 9999 !important;
             }
 
+            /* La regla con .active toma prioridad al abrirse */
             .header-nav.active {
                 display: flex !important;
             }
@@ -216,6 +218,7 @@ $isAdmin = esAdmin();
             .btn-head, .nav-link {
                 width: 100% !important;
                 text-align: center !important;
+                box-sizing: border-box !important;
             }
 
             .user-section {
