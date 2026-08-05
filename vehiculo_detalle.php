@@ -112,7 +112,7 @@ require_once 'includes/header.php';
 
         <!-- Muestra todos los chóferes asignados -->
         <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;">
-          👥 <b>Asignado a:</b> 
+           <b>Asignado a:</b> 
           <?php if (empty($usuarios_asignados)): ?>
             <span style="color: #e74c3c;">Sin asignar (Libre)</span>
           <?php else: ?>
@@ -129,7 +129,7 @@ require_once 'includes/header.php';
         <?php if (($_SESSION['rol'] ?? $_SESSION['user_role'] ?? '') === 'admin'): ?>
           <details style="position: relative; display: inline-block;">
             <summary class="btn btn-outline btn-sm" style="cursor: pointer; list-style: none; padding: 10px 14px; user-select: none;">
-              👥 Editar Chóferes ▾
+               Editar Chóferes ▾
             </summary>
 
             <form method="POST" style="position: absolute; left: 0; top: 115%; background: #162133; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 14px; min-width: 320px; width: max-content; max-width: 420px; z-index: 1000; box-shadow: 0 8px 24px rgba(0,0,0,0.5);">
@@ -223,7 +223,7 @@ require_once 'includes/header.php';
 
         <div>
           <button type="submit" class="btn btn-primary" style="padding: 10px 15px; border-radius: 5px; cursor: pointer;">
-            🚗 Registrar Salida de Vehículo
+             Registrar Salida de Vehículo
           </button>
         </div>
       </form>
@@ -232,7 +232,7 @@ require_once 'includes/header.php';
       <br>
     <!-- BOTÓN DE DESCARGA DE REPORTES DE USO -->
       <a href="reporte_uso_excel.php?vehiculo_id=<?= $id ?>" class="btn btn-outline" target="_blank">
-        📋 Descargar Reporte de Uso en Excel
+         Descargar Reporte de Uso en Excel
       </a>
   </div>
 
@@ -283,7 +283,7 @@ require_once 'includes/header.php';
     
     <div style="margin-top: 1rem;">
       <a href="reporte_gasolina_excel.php?vehiculo_id=<?= $id ?>" class="btn btn-outline" target="_blank">
-          📊 Descargar Reporte en Excel
+           Descargar Reporte de combustible en Excel
       </a>
     </div>
   </div>
@@ -334,7 +334,7 @@ require_once 'includes/header.php';
     
     <div style="margin-top: 1rem;">
       <a href="reporte_mantenimiento_excel.php?vehiculo_id=<?= $id ?>" class="btn btn-outline" target="_blank">
-          🛠️ Descargar Reporte de Mantenimientos
+          Descargar Reporte de Mantenimientos en Excel
       </a>
     </div>
   </div>
