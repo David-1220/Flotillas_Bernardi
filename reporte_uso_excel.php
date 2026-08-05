@@ -1,29 +1,25 @@
 <?php
-// ========================================================
-//   reporte_uso_excel.php — Generador de Reporte de Bitácora
-// ========================================================
-
-// 1. Ocultar errores directos para no corromper la descarga de Excel
-ini_set('display_errors', 0);
-error_reporting(E_ALL);
+// =============================================
+//  reporte_uso_excel.php — Exportación a Excel (CSV)
+// =============================================
 
 require_once 'includes/config.php';
 require_once 'includes/db.php';
 require_once 'includes/auth_check.php';
 
+$db = getDB();
+
 $vehiculo_id = $_GET['vehiculo_id'] ?? null;
 if (!$vehiculo_id) { die("ID de vehículo no especificado."); }
 
-$db = getDB();
-
-// 2. Obtener datos del vehículo
+// 1. Obtener datos del vehículo
 $stmtV = $db->prepare("SELECT marca, modelo, placas FROM vehiculos WHERE id = :id LIMIT 1");
 $stmtV->execute([':id' => $vehiculo_id]);
 $auto = $stmtV->fetch();
 
 if (!$auto) { die("Vehículo no encontrado."); }
 
-// 3. Obtener la bitácora de uso con datos del usuario
+// 2. Obtener la bitácora de uso con datos del usuario
 $stmt = $db->prepare("
     SELECT b.*, u.nombre AS usuario_nombre 
     FROM bitacora_uso b 
@@ -34,97 +30,52 @@ $stmt = $db->prepare("
 $stmt->execute([':id' => $vehiculo_id]);
 $registros = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// 4. LIMPIAR BÚFER DE SALIDA (Borra espacios o texto emitido por los require_once)
-if (ob_get_level()) {
-    ob_end_clean();
+// Configuración de Headers exactamente igual a Mantenimiento y Gasolina (.csv)
+$filename = "Bitacora_Uso_" . preg_replace('/[^A-Za-z0-9\-]/', '_', $auto['placas']) . "_" . date('Y-m-d_H-i') . ".csv";
+
+header('Content-Type: text/csv; charset=utf-8');
+header('Content-Disposition: attachment; filename="' . $filename . '"');
+
+// Crear el puntero de salida de datos
+$output = fopen('php://output', 'w');
+
+// BOM para que Excel reconozca acentos e idioma español correctamente (UTF-8)
+fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
+
+// Encabezados de las columnas en Excel
+fputcsv($output, [
+    'ID Registro',
+    'Usuario',
+    'Fecha Salida',
+    'KM Salida',
+    'Motivo / Destino',
+    'Fecha Entrada',
+    'KM Entrada',
+    'KM Recorridos',
+    'Observaciones Entrada',
+    'Estado'
+]);
+
+// Llenar filas de datos
+foreach ($registros as $r) {
+    $km_sal = (int)($r['km_salida'] ?? 0);
+    $km_ent = (int)($r['km_entrada'] ?? 0);
+    $km_recorridos = ($km_ent > 0 && $km_ent >= $km_sal) ? ($km_ent - $km_sal) : 0;
+    $estado_texto = ($r['estado'] === 'en_transito') ? 'EN TRÁNSITO' : 'FINALIZADO';
+
+    fputcsv($output, [
+        $r['id'],
+        $r['usuario_nombre'] ?? 'N/A',
+        $r['fecha_salida'],
+        $km_sal,
+        $r['motivo_salida'] ?? '',
+        $r['fecha_entrada'] ?? 'En tránsito',
+        $km_ent > 0 ? $km_ent : '-',
+        $km_recorridos,
+        $r['observaciones_entrada'] ?? '-',
+        $estado_texto
+    ]);
 }
 
-// 5. Configurar encabezados HTTP estrictos para Excel
-$filename = "Bitacora_Uso_" . preg_replace('/[^A-Za-z0-9\-]/', '_', $auto['placas']) . "_" . date('Y-m-d') . ".xls";
-
-header("Content-Type: application/vnd.ms-excel; charset=UTF-8");
-header("Content-Disposition: attachment; filename=\"$filename\"");
-header("Cache-Control: max-age=0");
-header("Pragma: no-cache");
-header("Expires: 0");
-
-// 6. Imprimir BOM UTF-8 para evitar caracteres raros y corrupción de acentos en Excel
-echo "\xEF\xBB\xBF";
-?>
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Reporte de Bitácora de Uso</title>
-    <style>
-        table { border-collapse: collapse; width: 100%; font-family: Arial, sans-serif; }
-        th { background-color: #1a252f; color: #ffffff; padding: 10px; border: 1px solid #000; text-align: left; }
-        td { padding: 8px; border: 1px solid #ccc; text-align: left; vertical-align: middle; }
-        .header-title { font-size: 16pt; font-weight: bold; color: #2c3e50; }
-    </style>
-</head>
-<body>
-
-    <p class="header-title">Reporte de Bitácora de Uso de Unidad</p>
-    <p><b>Vehículo:</b> <?= htmlspecialchars($auto['marca'] . ' ' . $auto['modelo']) ?> | <b>Placas:</b> <?= htmlspecialchars($auto['placas']) ?></p>
-    <p><b>Fecha de generación:</b> <?= date('Y-m-d H:i:s') ?></p>
-    <br>
-
-    <table>
-        <thead>
-            <tr>
-                <th># ID</th>
-                <th>Usuario</th>
-                <th>Fecha Salida</th>
-                <th>KM Salida</th>
-                <th>Motivo / Destino</th>
-                <th>Fecha Entrada</th>
-                <th>KM Entrada</th>
-                <th>KM Recorridos</th>
-                <th>Observaciones Entrada</th>
-                <th>Estado</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php if (empty($registros)): ?>
-                <tr>
-                    <td colspan="10" style="text-align: center;">No hay registros de uso para este vehículo.</td>
-                </tr>
-            <?php else: ?>
-                <?php foreach ($registros as $r): ?>
-                    <?php 
-                        $km_sal = (int)($r['km_salida'] ?? 0);
-                        $km_ent = (int)($r['km_entrada'] ?? 0);
-                        $km_recorridos = ($km_ent > 0 && $km_ent >= $km_sal) ? ($km_ent - $km_sal) : 0;
-                    ?>
-                    <tr>
-                        <td><?= $r['id'] ?></td>
-                        <td><?= htmlspecialchars($r['usuario_nombre'] ?? 'N/A') ?></td>
-                        <td><?= $r['fecha_salida'] ?></td>
-                        <td><?= number_format($km_sal) ?> km</td>
-                        <td><?= htmlspecialchars($r['motivo_salida'] ?? '') ?></td>
-                        <td><?= $r['fecha_entrada'] ?? 'En tránsito' ?></td>
-                        <td><?= $km_ent > 0 ? number_format($km_ent) . ' km' : '-' ?></td>
-                        <td><b><?= $km_recorridos > 0 ? number_format($km_recorridos) . ' km' : '0 km' ?></b></td>
-                        <td><?= htmlspecialchars($r['observaciones_entrada'] ?? '-') ?></td>
-
-                        <?php if ($r['estado'] === 'en_transito'): ?>
-                            <td bgcolor="#F39C12" style="background-color: #F39C12; color: #000000; font-weight: bold; text-align: center;">
-                                EN TRÁNSITO
-                            </td>
-                        <?php else: ?>
-                            <td bgcolor="#2ECC71" style="background-color: #2ECC71; color: #000000; font-weight: bold; text-align: center;">
-                                FINALIZADO
-                            </td>
-                        <?php endif; ?>
-                    </tr>
-                <?php endforeach; ?>
-            <?php endif; ?>
-        </tbody>
-    </table>
-
-</body>
-</html>
-<?php
-// 7. Detener la ejecución para no imprimir nada extra al final
+fclose($output);
 exit();
