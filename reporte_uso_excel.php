@@ -3,6 +3,10 @@
 //   reporte_uso_excel.php — Generador de Reporte de Bitácora
 // ========================================================
 
+// 1. Ocultar errores directos para no corromper la descarga de Excel
+ini_set('display_errors', 0);
+error_reporting(E_ALL);
+
 require_once 'includes/config.php';
 require_once 'includes/db.php';
 require_once 'includes/auth_check.php';
@@ -12,14 +16,14 @@ if (!$vehiculo_id) { die("ID de vehículo no especificado."); }
 
 $db = getDB();
 
-// 1. Obtener datos del vehículo
+// 2. Obtener datos del vehículo
 $stmtV = $db->prepare("SELECT marca, modelo, placas FROM vehiculos WHERE id = :id LIMIT 1");
 $stmtV->execute([':id' => $vehiculo_id]);
 $auto = $stmtV->fetch();
 
 if (!$auto) { die("Vehículo no encontrado."); }
 
-// 2. Obtener la bitácora de uso con datos del usuario
+// 3. Obtener la bitácora de uso con datos del usuario
 $stmt = $db->prepare("
     SELECT b.*, u.nombre AS usuario_nombre 
     FROM bitacora_uso b 
@@ -30,18 +34,28 @@ $stmt = $db->prepare("
 $stmt->execute([':id' => $vehiculo_id]);
 $registros = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Configurar encabezados para descarga de archivo Excel HTML
+// 4. LIMPIAR BÚFER DE SALIDA (Borra espacios o texto emitido por los require_once)
+if (ob_get_level()) {
+    ob_end_clean();
+}
+
+// 5. Configurar encabezados HTTP estrictos para Excel
 $filename = "Bitacora_Uso_" . preg_replace('/[^A-Za-z0-9\-]/', '_', $auto['placas']) . "_" . date('Y-m-d') . ".xls";
 
-header("Content-Type: application/vnd.ms-excel; charset=utf-8");
+header("Content-Type: application/vnd.ms-excel; charset=UTF-8");
 header("Content-Disposition: attachment; filename=\"$filename\"");
+header("Cache-Control: max-age=0");
 header("Pragma: no-cache");
 header("Expires: 0");
+
+// 6. Imprimir BOM UTF-8 para evitar caracteres raros y corrupción de acentos en Excel
+echo "\xEF\xBB\xBF";
 ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <title>Reporte de Bitácora de Uso</title>
     <style>
         table { border-collapse: collapse; width: 100%; font-family: Arial, sans-serif; }
         th { background-color: #1a252f; color: #ffffff; padding: 10px; border: 1px solid #000; text-align: left; }
@@ -88,13 +102,12 @@ header("Expires: 0");
                         <td><?= htmlspecialchars($r['usuario_nombre'] ?? 'N/A') ?></td>
                         <td><?= $r['fecha_salida'] ?></td>
                         <td><?= number_format($km_sal) ?> km</td>
-                        <td><?= htmlspecialchars($r['motivo_salida']) ?></td>
+                        <td><?= htmlspecialchars($r['motivo_salida'] ?? '') ?></td>
                         <td><?= $r['fecha_entrada'] ?? 'En tránsito' ?></td>
                         <td><?= $km_ent > 0 ? number_format($km_ent) . ' km' : '-' ?></td>
                         <td><b><?= $km_recorridos > 0 ? number_format($km_recorridos) . ' km' : '0 km' ?></b></td>
                         <td><?= htmlspecialchars($r['observaciones_entrada'] ?? '-') ?></td>
-                        
-                        <!-- Aplica el estilo y fondo directo en el <td> para compatibilidad con Excel -->
+
                         <?php if ($r['estado'] === 'en_transito'): ?>
                             <td bgcolor="#F39C12" style="background-color: #F39C12; color: #000000; font-weight: bold; text-align: center;">
                                 EN TRÁNSITO
@@ -112,3 +125,6 @@ header("Expires: 0");
 
 </body>
 </html>
+<?php
+// 7. Detener la ejecución para no imprimir nada extra al final
+exit();
