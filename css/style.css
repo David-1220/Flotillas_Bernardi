@@ -349,3 +349,121 @@ footer {
 .page-wrapper .form-grid > .card table {
   height: 100%;
 }
+
+/* ========================================================
+   ESTILOS GENERALES DEL NAVBAR
+   ======================================================== */
+.navbar-main {
+    background-color: #0f172a; /* Azul marino oscuro */
+    border-bottom: 1px solid #1e293b;
+    padding: 12px 20px;
+}
+
+.navbar-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.navbar-menu {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Colores legibles para el usuario */
+.user-name {
+    color: #e2e8f0;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.logout-link {
+    color: #f87171 !important; /* Rojo claro legible */
+    font-size: 14px;
+    margin-left: 8px;
+    text-decoration: underline;
+}
+
+.hamburger-btn {
+    display: none; /* Oculto en PC */
+    flex-direction: column;
+    justify-content: space-between;
+    width: 28px;
+    height: 20px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+.hamburger-btn .bar {
+    width: 100%;
+    height: 3px;
+    background-color: #ffffff;
+    border-radius: 2px;
+}
+
+/* ========================================================
+   ADAPTACIÓN RESPONSIVA PARA MÓVIL (PANTALLAS <= 768px)
+   ======================================================== */
+@media (max-width: 768px) {
+    .hamburger-btn {
+        display: flex; /* Mostrar hamburguesa en cel */
+    }
+
+    .navbar-menu {
+        display: none; /* Oculto por defecto en celular */
+        flex-direction: column;
+        align-items: stretch;
+        width: 100%;
+        background-color: #0f172a;
+        position: absolute;
+        top: 60px;
+        left: 0;
+        padding: 20px;
+        border-bottom: 1px solid #1e293b;
+        box-shadow: 0px 10px 15px rgba(0, 0, 0, 0.5);
+        z-index: 100;
+    }
+
+    /* Clase que activa el JS al presionar el botón */
+    .navbar-menu.active {
+        display: flex;
+    }
+
+    .nav-links {
+        flex-direction: column;
+        width: 100%;
+        gap: 12px;
+    }
+
+    .nav-links a {
+        width: 100%;
+        text-align: center;
+        padding: 10px;
+    }
+
+    .nav-user {
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 1px solid #1e293b;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    /* Formulario de Control de Uso a 1 sola columna en cel */
+    .control-uso-form {
+        display: flex;
+        flex-direction: column !important;
+        gap: 12px;
+    }
+}
