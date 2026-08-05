@@ -60,40 +60,38 @@ $isAdmin = esAdmin();
         </a>
 
         <!-- Menú de Navegación -->
-        <nav style="display: flex; align-items: center; gap: 0.8rem; flex-wrap: wrap;">
-            <!-- Enlace al catálogo -->
-            <a href="index.php" class="nav-link" style="color: var(--text-muted, #94a3b8); text-decoration: none; font-size: 0.9rem; font-weight: 500; margin-right: 0.5rem;">
-                 Catálogo
-            </a>
-
-            <!-- BOTÓN: Agregar Vehículo -->
-            <?php if ($isAdmin): ?>
-                <a href="vehiculo_alta.php" class="btn btn-outline btn-sm" style="display: inline-flex; align-items: center; gap: 5px;">
-                     + Agregar Vehículo
+        <header class="navbar-main">
+            <div class="navbar-container">
+                <!-- Logo y Marca -->
+                <a href="index.php" class="navbar-brand">
+                    <span class="brand-logo">Bernardi</span>
+                    <span class="brand-sub">Flotillas</span>
                 </a>
-            <?php else: ?>
-                <span class="btn btn-outline btn-sm btn-disabled" title="Requiere permisos de Administrador">
-                     + Agregar Vehículo
-                </span>
-            <?php endif; ?>
-
-            <!-- BOTÓN: Agregar Usuario -->
-            <?php if ($isAdmin): ?>
-                <a href="usuarios.php" class="btn btn-primary btn-sm" style="display: inline-flex; align-items: center; gap: 5px;">
-                     + Agregar Usuario
-                </a>
-            <?php else: ?>
-                <span class="btn btn-primary btn-sm btn-disabled" title="Requiere permisos de Administrador">
-                    + Agregar Usuario
-                </span>
-            <?php endif; ?>
-
-            <!-- Cerrar Sesión -->
-            <div class="user-area">
-              👤 <?= htmlspecialchars($_SESSION['usuario_nombre'] ?? 'Usuario') ?>
-              <a href="logout.php">Cerrar sesión</a>
+        
+                <!-- Botón Hamburguesa (solo visible en celular) -->
+                <button class="hamburger-btn" id="hamburgerBtn" aria-label="Abrir menú">
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                </button>
+        
+                <!-- Contenido del Menú -->
+                <div class="navbar-menu" id="navbarMenu">
+                    <div class="nav-links">
+                        <a href="index.php" class="btn-nav-link">Catálogo</a>
+                        <a href="agregar_vehiculo.php" class="btn-nav-outline">+ Agregar Vehículo</a>
+                        <a href="agregar_usuario.php" class="btn-nav-blue">+ Agregar Usuario</a>
+                    </div>
+        
+                    <div class="nav-user">
+                        <span class="user-name">
+                            <i class="fas fa-user"></i> <?= htmlspecialchars($_SESSION['usuario_nombre'] ?? 'Usuario') ?>
+                        </span>
+                        <a href="logout.php" class="logout-link">Cerrar sesión</a>
+                    </div>
+                </div>
             </div>
-        </nav>
+        </header>
 
     </div>
 </header>
