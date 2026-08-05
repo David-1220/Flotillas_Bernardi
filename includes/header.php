@@ -252,8 +252,8 @@ $isAdmin = esAdmin();
             <div class="nav-links">
                 <a href="index.php" class="nav-link">Catálogo</a>
                 <?php if ($isAdmin): ?>
-                    <a href="agregar_vehiculo.php" class="btn-head outline">+ Agregar Vehículo</a>
-                    <a href="agregar_usuario.php" class="btn-head primary">+ Agregar Usuario</a>
+                    <a href="vehiculo_alta.php" class="btn-head outline">+ Agregar Vehículo</a>
+                    <a href="usuario.php" class="btn-head primary">+ Agregar Usuario</a>
                 <?php endif; ?>
             </div>
 
