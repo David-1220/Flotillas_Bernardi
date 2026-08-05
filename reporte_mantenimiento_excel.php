@@ -1,7 +1,10 @@
 <?php
 // =============================================
-//  reporte_mantenimiento_excel.php — Exportación a Excel (CSV)
+//  reporte_mantenimiento_excel.php — Exportación a Excel Visual
 // =============================================
+
+ini_set('display_errors', 0);
+error_reporting(E_ALL);
 
 require_once 'includes/config.php';
 require_once 'includes/db.php';
@@ -13,6 +16,17 @@ $db = getDB();
 $vehiculo_id  = $_GET['vehiculo_id'] ?? null;
 $fecha_inicio = $_GET['fecha_inicio'] ?? null;
 $fecha_fin    = $_GET['fecha_fin'] ?? null;
+
+// Obtener datos del vehículo si se filtró por uno específico
+$auto_info = "Todos los vehículos";
+if (!empty($vehiculo_id)) {
+    $stmtV = $db->prepare("SELECT marca, modelo, placas FROM vehiculos WHERE id = :id LIMIT 1");
+    $stmtV->execute([':id' => $vehiculo_id]);
+    $auto = $stmtV->fetch();
+    if ($auto) {
+        $auto_info = "Vehículo: " . $auto['marca'] . " " . $auto['modelo'] . " | Placas: " . $auto['placas'];
+    }
+}
 
 // Construcción de la consulta con filtros dinámicos
 $sql = "SELECT 
@@ -54,48 +68,106 @@ $stmt = $db->prepare($sql);
 $stmt->execute($params);
 $registros = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Headers para descarga directa en Excel
-$filename = "reporte_mantenimientos_" . date('Y-m-d_H-i') . ".csv";
-
-header('Content-Type: text/csv; charset=utf-8');
-header('Content-Disposition: attachment; filename="' . $filename . '"');
-
-$output = fopen('php://output', 'w');
-
-// BOM UTF-8 para compatibilidad de acentos en Excel
-fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
-
-// Encabezados
-fputcsv($output, [
-    'ID Registro',
-    'Marca',
-    'Modelo',
-    'Placas',
-    'Mantenimiento / Servicio',
-    'Categoría',
-    'Fecha de Servicio',
-    'Kilometraje',
-    'Costo Total ($)',
-    'Taller / Proveedor',
-    'Notas'
-]);
-
-// Filas de datos
-foreach ($registros as $row) {
-    fputcsv($output, [
-        $row['id'],
-        $row['marca'],
-        $row['modelo'],
-        $row['placas'],
-        $row['tipo_mantenimiento'],
-        ucfirst($row['tipo_servicio']),
-        $row['fecha_servicio'],
-        $row['kilometraje'],
-        $row['costo_total'],
-        $row['taller_proveedor'],
-        $row['notas']
-    ]);
+// Limpieza de búfer de salida
+if (ob_get_level()) {
+    ob_end_clean();
 }
 
-fclose($output);
+// Configuración de Headers
+$filename = "reporte_mantenimientos_" . date('Y-m-d_H-i') . ".xls";
+
+header("Content-Type: application/vnd.ms-excel; charset=UTF-8");
+header("Content-Disposition: attachment; filename=\"$filename\"");
+header("Cache-Control: max-age=0");
+header("Pragma: no-cache");
+header("Expires: 0");
+
+// BOM UTF-8 para acentos y caracteres especiales
+echo "\xEF\xBB\xBF";
+?>
+<!DOCTYPE html>
+<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <!--[if gte mso 9]>
+    <xml>
+        <x:ExcelWorkbook>
+            <x:ExcelWorksheets>
+                <x:ExcelWorksheet>
+                    <x:Name>Mantenimientos</x:Name>
+                    <x:WorksheetOptions>
+                        <x:DisplayGridlines/>
+                    </x:WorksheetOptions>
+                </x:ExcelWorksheet>
+            </x:ExcelWorksheets>
+        </x:ExcelWorkbook>
+    </xml>
+    <![endif]-->
+    <style>
+        body { font-family: Calibri, Arial, sans-serif; }
+        .title { font-size: 16pt; font-weight: bold; color: #1f4e78; }
+        .sub-info { font-size: 11pt; }
+        table { border-collapse: collapse; width: 100%; }
+        th { background-color: #ffffff; color: #000000; font-weight: bold; border: 1px solid #d9d9d9; padding: 6px; text-align: left; }
+        td { border: 1px solid #d9d9d9; padding: 6px; text-align: left; font-size: 10pt; }
+    </style>
+</head>
+<body>
+
+    <table>
+        <tr>
+            <td colspan="11" class="title">Reporte de Mantenimientos</td>
+        </tr>
+        <tr><td colspan="11"></td></tr>
+        <tr>
+            <td colspan="11" class="sub-info"><b><?= htmlspecialchars($auto_info) ?></b></td>
+        </tr>
+        <tr><td colspan="11"></td></tr>
+        <tr>
+            <td colspan="11" class="sub-info"><b>Fecha de generación:</b> <?= date('Y-m-d H:i:s') ?></td>
+        </tr>
+        <tr><td colspan="11"></td></tr>
+        <thead>
+            <tr>
+                <th># ID</th>
+                <th>Marca</th>
+                <th>Modelo</th>
+                <th>Placas</th>
+                <th>Mantenimiento / Servicio</th>
+                <th>Categoría</th>
+                <th>Fecha de Servicio</th>
+                <th>Kilometraje</th>
+                <th>Costo Total ($)</th>
+                <th>Taller / Proveedor</th>
+                <th>Notas</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php if (empty($registros)): ?>
+                <tr>
+                    <td colspan="11" style="text-align: center;">No hay registros de mantenimiento para este filtro.</td>
+                </tr>
+            <?php else: ?>
+                <?php foreach ($registros as $row): ?>
+                    <tr>
+                        <td><?= $row['id'] ?></td>
+                        <td><?= htmlspecialchars($row['marca']) ?></td>
+                        <td><?= htmlspecialchars($row['modelo']) ?></td>
+                        <td><?= htmlspecialchars($row['placas']) ?></td>
+                        <td><?= htmlspecialchars($row['tipo_mantenimiento']) ?></td>
+                        <td><?= htmlspecialchars(ucfirst($row['tipo_servicio'])) ?></td>
+                        <td><?= $row['fecha_servicio'] ?></td>
+                        <td><?= number_format((int)$row['kilometraje']) ?> km</td>
+                        <td><b>$<?= number_format((float)$row['costo_total'], 2) ?></b></td>
+                        <td><?= htmlspecialchars($row['taller_proveedor'] ?? '-') ?></td>
+                        <td><?= htmlspecialchars($row['notas'] ?? '-') ?></td>
+                    </tr>
+                <?php endforeach; ?>
+            <?php endif; ?>
+        </tbody>
+    </table>
+
+</body>
+</html>
+<?php
 exit();
