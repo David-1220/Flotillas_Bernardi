@@ -189,7 +189,7 @@ $isAdmin = esAdmin();
             }
 
             .header-nav {
-                display: none; /* Se quita el !important para que .active pueda sobreescribirlo */
+                display: none !important; /* Se quita el !important para que .active pueda sobreescribirlo */
                 flex-direction: column !important;
                 align-items: stretch !important;
                 position: absolute !important;
