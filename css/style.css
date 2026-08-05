@@ -384,3 +384,36 @@ footer {
     text-align: center;
   }
 }
+
+/* ========================================================
+   GRID DE TARJETAS DE VEHÍCULOS (.dl-grid)
+   ======================================================== */
+.dl-grid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)) !important;
+    gap: 1.5rem !important;
+    margin-top: 1.5rem !important;
+    align-items: stretch !important;
+}
+
+/* Para que el <a> dentro del grid ocupe todo el espacio */
+.dl-grid > a {
+    display: flex !important;
+    flex-direction: column !important;
+    text-decoration: none !important;
+    color: inherit !important;
+}
+
+/* Ajuste de la tarjeta interna */
+.dl-grid .auto-card {
+    flex: 1 !important;
+    height: 100% !important;
+    margin-top: 0 !important; /* Evita márgenes extra */
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+.dl-grid .auto-card:hover {
+    transform: translateY(-4px) !important;
+    border-color: var(--accent, #1a73e8) !important;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.4) !important;
+}
