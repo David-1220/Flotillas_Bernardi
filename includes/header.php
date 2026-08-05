@@ -19,7 +19,7 @@ $isAdmin = esAdmin();
     <title>Bernardi — Flotilla de Vehículos</title>
     
     <!-- Favicon -->
-    <link rel="icon" type="image/png" href="uploads/bernardi/logo-b.png">
+    <link rel="icon" type="image/png" href="uploads/bernardi/logo-r-mini.png">
     
     <!-- Hoja de estilos global -->
     <link rel="stylesheet" href="css/style.css?v=<?= time() ?>">
